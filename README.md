@@ -216,6 +216,62 @@ python3 -m http.server 8080
 
 ---
 
+### ✅ **Download Tor Browser for Linux (64-bit)**
+
+#### **Option 1: Using your web browser**
+
+1. Go to the official Tor Project website:
+   👉 [https://www.torproject.org/download/](https://www.torproject.org/download/)
+
+2. Click on the **Linux** download button.
+
+   * It will download a file named something like:
+     `tor-browser-linux-x86_64-14.5.1.tar.xz`
+
+3. Save it to your desired directory — for example, `~/Documents/TorService`.
+
+---
+
+#### **Option 2: Using the command line with `wget`**
+
+If you prefer downloading from the terminal, use this:
+
+```bash
+cd ~/Documents/TorService
+wget https://www.torproject.org/dist/torbrowser/14.5.1/tor-browser-linux-x86_64-14.5.1.tar.xz
+```
+
+---
+
+### 📝 **Install Tor**
+
+1. **Extract**:
+
+   ```bash
+   tar -xf tor-browser-linux-x86_64-14.5.1.tar.xz
+   ```
+
+2. **Navigate**:
+
+   ```bash
+   cd tor-browser_en-US
+   ```
+
+3. **Launch**:
+
+   ```bash
+   ./start-tor-browser.desktop
+   ```
+
+   If needed:
+
+   ```bash
+   chmod +x start-tor-browser.desktop
+   ./start-tor-browser.desktop
+   ```
+
+---
+
 Here’s a dynamic **reference table** for estimating the time to generate a Tor v3 **vanity `.onion` address** using [`mkp224o`](https://github.com/cathugger/mkp224o), based on:
 
 * ✅ **Machine type** (Laptop / Server / Cloud)
