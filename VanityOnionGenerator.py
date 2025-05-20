@@ -4,12 +4,15 @@ import threading
 import tkinter as tk
 from tkinter import messagebox, scrolledtext, ttk
 import math
+import re
 
 # Path to your mkp224o binary
 MKP224O_PATH = "./mkp224o/mkp224o"
 os.makedirs("onions", exist_ok=True)
 
 current_process = None  # Global process ref
+
+VALID_CHARS_PATTERN = re.compile(r'^[a-z2-7]*$')
 
 def estimate_time(prefix):
     try:
@@ -31,15 +34,55 @@ def estimate_time(prefix):
 
         if est_seconds < 1:
             return "<1 second"
-        elif est_seconds < 60:
-            return f"{est_seconds:.1f} seconds"
-        elif est_seconds < 3600:
-            return f"{est_seconds // 60:.0f} minutes"
-        else:
-            return f"{est_seconds // 3600:.1f} hours"
+
+        # Convert seconds into y:m:d:h:m:s
+        seconds = int(est_seconds)
+        years, seconds = divmod(seconds, 365*24*3600)
+        months, seconds = divmod(seconds, 30*24*3600)
+        days, seconds = divmod(seconds, 24*3600)
+        hours, seconds = divmod(seconds, 3600)
+        minutes, seconds = divmod(seconds, 60)
+
+        parts = []
+        if years > 0:
+            parts.append(f"{years} years")
+        if months > 0 or years > 0:
+            parts.append(f"{months} months")
+        if days > 0 or months > 0 or years > 0:
+            parts.append(f"{days} days")
+        if hours > 0 or days > 0 or months > 0 or years > 0:
+            parts.append(f"{hours} hours")
+        if minutes > 0 or hours > 0 or days > 0 or months > 0 or years > 0:
+            parts.append(f"{minutes} minutes")
+        parts.append(f"{seconds} seconds")
+
+        return " : ".join(parts)
 
     except Exception:
         return "Error estimating"
+
+def validate_characters(new_value):
+    if VALID_CHARS_PATTERN.fullmatch(new_value):
+        return True
+    else:
+        messagebox.showwarning("Invalid Input", "Only lowercase letters (a–z) and digits 2–7 are allowed.")
+        return False
+
+def update_estimate(prefix_entry, time_box):
+    prefix = prefix_entry.get().strip()
+    if not prefix:
+        time_box.config(state=tk.NORMAL)
+        time_box.delete(0, tk.END)
+        time_box.insert(0, "Estimated time will appear here")
+        time_box.config(state="readonly")
+        return
+
+    if VALID_CHARS_PATTERN.fullmatch(prefix):
+        est = estimate_time(prefix)
+        time_box.config(state=tk.NORMAL)
+        time_box.delete(0, tk.END)
+        time_box.insert(0, f"Estimated time: {est}")
+        time_box.config(state="readonly")
 
 def run_mkp224o(prefix, output_box, start_btn, stop_btn):
     global current_process
@@ -84,7 +127,6 @@ def start_generation(entry, output_box, time_box, start_btn, stop_btn):
         messagebox.showerror("Invalid Prefix", "Prefix must be 5–16 characters.")
         return
 
-    # Show estimated time
     est = estimate_time(prefix)
     time_box.config(state=tk.NORMAL)
     time_box.delete(0, tk.END)
@@ -121,13 +163,18 @@ def main():
     style.configure("TLabel", background="#2e2e2e", foreground="#ffffff", font=("Segoe UI", 10))
 
     ttk.Label(root, text="Enter Desired Prefix:").pack(pady=10)
-    entry = ttk.Entry(root, width=30)
-    entry.pack(pady=5)
 
-    time_box = tk.Entry(root, width=40, justify="center", font=("Segoe UI", 10))
-    time_box.pack(pady=5)
-    time_box.insert(0, "Estimated time will appear here")
-    time_box.config(state="readonly")
+    # Register validation and estimate updater
+    def on_entry_change(*args):
+        update_estimate(entry, time_box)
+
+    vcmd = (root.register(validate_characters), "%P")
+    entry_var = tk.StringVar()
+    entry_var.trace_add("write", on_entry_change)
+
+    # ✅ Move input field back to top (below the label)
+    entry = ttk.Entry(root, width=30, validate="key", validatecommand=vcmd, textvariable=entry_var)
+    entry.pack(pady=5)
 
     button_frame = tk.Frame(root, bg="#2e2e2e")
     button_frame.pack(pady=10)
@@ -135,6 +182,12 @@ def main():
     output_box = scrolledtext.ScrolledText(root, height=15, width=90, bg="#1e1e1e",
                                            fg="#00ff00", insertbackground="white")
     output_box.pack(padx=10, pady=10)
+
+    # Estimated time box (kept at bottom)
+    time_box = tk.Entry(root, width=40, justify="center", font=("Segoe UI", 10))
+    time_box.insert(0, "Estimated time will appear here")
+    time_box.config(state="readonly")
+    time_box.pack(fill='x', padx=10, pady=(10, 5))
 
     start_btn = ttk.Button(button_frame, text="Generate .onion")
     stop_btn = ttk.Button(button_frame, text="Stop", state=tk.DISABLED)
