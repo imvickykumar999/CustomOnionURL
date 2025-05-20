@@ -1,4 +1,8 @@
-># CustomOnionURL
+># `Custom Onion URL`
+>
+>✅ **Valid .onion characters**: `a–z` and `2–7`
+>
+>❌ **Invalid**: `0`, `1`, `8`, `9`, uppercase letters, symbols are not in the Base32 alphabet Tor uses.
 >
 >![image](https://github.com/user-attachments/assets/4b5f3c03-ba31-4574-9032-a155e5192ace)
 
