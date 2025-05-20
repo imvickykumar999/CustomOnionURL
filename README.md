@@ -4,7 +4,17 @@
 >
 >❌ **Invalid**: `0`, `1`, `8`, `9`, uppercase letters, symbols are not in the Base32 alphabet Tor uses.
 >
->![image](https://github.com/user-attachments/assets/4b5f3c03-ba31-4574-9032-a155e5192ace)
+>![image](https://github.com/user-attachments/assets/ac03693a-ad02-429b-b935-327f3bda581a)
+
+## Time Comparison for 12 character
+
+    4 cores take 7616 years
+    
+![image](https://github.com/user-attachments/assets/0eb2ecac-22cf-448b-98bb-e4d2e21c1958)
+
+    40 cores take 761 years
+    
+![image](https://github.com/user-attachments/assets/1d41b13a-2867-4c9b-a413-f63ff198a25b)
 
 ### ✅ 1. Create a Bash Script
 
