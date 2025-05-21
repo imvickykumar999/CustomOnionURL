@@ -326,3 +326,115 @@ Here’s a dynamic **reference table** for estimating the time to generate a Tor
 * 🧮 **Base32 math**: Each character = 5 bits. Prefix of N chars → `1 in 32^N` chance.
 * ⚙️ **AVX2/AVX512** support massively improves performance.
 * 🔁 **Actual time is probabilistic** — even with 40 threads, it can vary.
+
+---
+
+## Run background process
+
+Screen Usage for Running Long Background Processes (e.g. mkp224o)
+
+This guide explains how to use `screen` to run long-running processes in the background safely.
+
+---
+
+## 📦 Start a New Screen Session
+
+```bash
+screen -S <session_name>
+````
+
+**Example:**
+
+```bash
+screen -S mkp224o-clean
+```
+
+Once inside the screen, run your command:
+
+```bash
+./mkp224o -d onions IMVICKYKUMAR
+```
+
+---
+
+## 🔌 Detach from a Session (Keep It Running in Background)
+
+Press:
+
+```
+Ctrl + A, then D
+```
+
+This detaches the session. The process keeps running in the background even if you close the terminal.
+
+---
+
+## 🔁 Reconnect to a Session
+
+### If You Know the Name:
+
+```bash
+screen -r <session_name>
+```
+
+**Example:**
+
+```bash
+screen -r mkp224o-clean
+```
+
+### If There Are Multiple Sessions:
+
+```bash
+screen -ls
+```
+
+Then attach with the session ID:
+
+```bash
+screen -r <session_id>
+```
+
+---
+
+## ❌ Quit a Screen Session (Stop the Process)
+
+### By Session Name:
+
+```bash
+screen -X -S <session_name> quit
+```
+
+**Example:**
+
+```bash
+screen -X -S mkp224o-clean quit
+```
+
+### By Session ID:
+
+```bash
+screen -X -S <session_id> quit
+```
+
+**Example:**
+
+```bash
+screen -X -S 123456.quit
+```
+
+---
+
+## 🧼 List All Screen Sessions
+
+```bash
+screen -ls
+```
+
+Use this to see which sessions are active or detached.
+
+---
+
+## 📎 Tip
+
+Use unique session names to avoid confusion when running multiple background tasks.
