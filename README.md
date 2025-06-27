@@ -1,440 +1,205 @@
-># `Custom Onion URL`
->
->✅ **Valid .onion characters**: `a–z` and `2–7`
->
->❌ **Invalid**: `0`, `1`, `8`, `9`, uppercase letters, symbols are not in the Base32 alphabet Tor uses.
->
->![image](https://github.com/user-attachments/assets/ac03693a-ad02-429b-b935-327f3bda581a)
+Certainly! Let's go through the complete steps from the beginning to generate a **custom .onion** address starting with **IMVICKYKUMAR** using the **mkp224o** tool, assuming you're using a Linux-based system like Ubuntu.
 
-## Time Comparison for 12 character
+### Step-by-Step Commands for Beginners
 
-    4 cores take 7616 years
-    
-![image](https://github.com/user-attachments/assets/0eb2ecac-22cf-448b-98bb-e4d2e21c1958)
+1. **Install Required Dependencies**
 
-    40 cores take 761 years
-    
-![image](https://github.com/user-attachments/assets/1d41b13a-2867-4c9b-a413-f63ff198a25b)
+   First, you'll need to install some development tools and libraries to build the `mkp224o` project. These include compilers and the `libsodium` library.
 
-### ✅ 1. Create a Bash Script
+   Run the following commands to install dependencies:
 
-You can name it `generate_onion.sh`. Here’s the full content:
+   ```bash
+   sudo apt update
+   sudo apt install build-essential autoconf automake libsodium-dev git
+   ```
+
+   * `build-essential`: Installs the essential tools for compiling software (like `gcc` and `make`).
+   * `autoconf` and `automake`: These are needed for generating build files.
+   * `libsodium-dev`: This is the required library for cryptographic functions.
+   * `git`: Used to clone the repository.
+
+2. **Clone the Repository**
+
+   Use `git` to clone the `mkp224o` repository:
+
+   ```bash
+   git clone https://github.com/cathugger/mkp224o.git
+   ```
+
+   This will create a directory called `mkp224o` in your current directory.
+
+3. **Navigate to the Project Directory**
+
+   Change to the `mkp224o` directory:
+
+   ```bash
+   cd mkp224o
+   ```
+
+4. **Run `autogen.sh` to Generate Build Files**
+
+   Before you can compile the project, run the `autogen.sh` script to generate the necessary configuration files:
+
+   ```bash
+   chmod +x autogen.sh  # Make sure the script is executable
+   ./autogen.sh
+   ```
+
+   This script will create the `configure` script, which is used to configure the build environment.
+
+5. **Run `configure` to Set Up the Build**
+
+   Run the `configure` script to prepare the environment for building the project:
+
+   ```bash
+   ./configure
+   ```
+
+   This will check if your system has the required libraries and tools.
+
+6. **Build the Project with `make`**
+
+   Once the configuration is done, you can compile the project by running:
+
+   ```bash
+   make
+   ```
+
+   This will compile the `mkp224o` tool and generate the executable.
+
+7. **Generate the Vanity .onion Address**
+
+   After building the tool, you can use it to generate a custom .onion address. For example, to generate a .onion address starting with `IMVICKYKUMAR`, use the following command:
+
+   ```bash
+   ./mkp224o -d onions IMVICKYKUMAR
+   ```
+
+   This command:
+
+   * **`-d onions`**: Tells `mkp224o` to create a directory named `onions` to store the generated private key and .onion address.
+   * **`IMVICKYKUMAR`**: Specifies the desired prefix for the .onion address.
+
+8. **Wait for the Process to Complete**
+
+   Depending on your system's power and the complexity of the prefix, it may take some time. You will see output like this while the process is running:
+
+   ```bash
+   set workdir: onions/
+   sorting filters... done.
+   filters:
+   imvickykumar
+   in total, 1 filter
+   using 4 threads
+   ```
+
+   The process is working, but it may take time depending on the number of threads available and your system’s performance.
+
+9. **Check for the Generated Address**
+
+   Once the process is finished, you can find the private key and the generated **.onion** address in the `onions/` directory.
+
+   Check the `onions/` folder for the generated files:
+
+   ```bash
+   ls onions/
+   ```
+
+   You should see something like:
+
+   * `hs_ed25519_secret_key`: The private key file.
+   * `hs_ed25519_public_key`: The public key.
+   * `hostname`: The generated .onion address.
+
+10. **Set Up Tor Hidden Service**
+
+Now, to use your custom .onion address, you need to configure your Tor hidden service.
+
+* **Open the `torrc` file** (located at `/etc/tor/torrc`):
+
+  ```bash
+  sudo nano /etc/tor/torrc
+  ```
+
+* **Add the following lines** to configure your hidden service to use the generated private key and start the service on port 80:
+
+  ```txt
+  HiddenServiceDir /var/lib/tor/hidden_service/
+  HiddenServicePort 80 127.0.0.1:8080
+  ```
+
+  This configuration tells Tor to use the directory `/var/lib/tor/hidden_service/` for your hidden service.
+
+* **Save and close the file** by pressing `CTRL + O`, then `Enter`, and `CTRL + X` to exit.
+
+11. **Copy the Private Key**
+
+Move the private key you generated into the hidden service directory:
 
 ```bash
-#!/bin/bash
+sudo cp onions/hs_ed25519_secret_key /var/lib/tor/hidden_service/hs_ed25519_secret_key
+```
 
-# Prompt for prefix
-read -p "Enter your desired .onion prefix (e.g., IMVICKYKUMAR): " PREFIX
+12. **Restart the Tor Service**
 
-# Step 1: Install required packages
-echo "Installing dependencies..."
+Restart Tor for the changes to take effect:
+
+```bash
+sudo systemctl restart tor
+```
+
+13. **Access Your Hidden Service**
+
+After restarting Tor, you can now access your custom .onion address using the Tor browser. The address will be saved in the `hostname` file within the `onions/` directory.
+
+To get your .onion address, run:
+
+```bash
+cat onions/hostname
+```
+
+This will display the full **.onion** address you just generated.
+
+### Summary of Commands:
+
+```bash
+# Install dependencies
 sudo apt update
-sudo apt install -y build-essential autoconf automake libsodium-dev git
+sudo apt install build-essential autoconf automake libsodium-dev git
 
-# Step 2: Clone the mkp224o repo if it doesn't exist
-if [ ! -d "mkp224o" ]; then
-    echo "Cloning mkp224o repository..."
-    git clone https://github.com/cathugger/mkp224o.git
-fi
+# Clone the repository
+git clone https://github.com/cathugger/mkp224o.git
+cd mkp224o
 
-cd mkp224o || exit 1
-
-# Step 3: Run autogen.sh
-echo "Preparing build environment..."
+# Run autogen.sh to prepare the build
 chmod +x autogen.sh
 ./autogen.sh
 
-# Step 4: Configure the build
+# Configure the project
 ./configure
 
-# Step 5: Compile mkp224o
+# Build the project
 make
 
-# Step 6: Run mkp224o with the provided prefix
-echo "Generating .onion address with prefix: $PREFIX"
-./mkp224o -d onions "$PREFIX"
+# Generate the vanity .onion address
+./mkp224o -d onions IMVICKYKUMAR
 
-# Step 7: Output generated address
-echo "Your custom .onion address is:"
+# Check the generated address
 cat onions/hostname
 
-# Optional: Prompt to open hostname in nano
-read -p "Do you want to view/edit the hostname in nano? (y/n): " EDIT
-if [ "$EDIT" == "y" ]; then
-    nano onions/hostname
-fi
-```
-
----
-
-### ✅ 2. Save and Make It Executable
-
-Save the script:
-
-```bash
-nano generate_onion.sh
-# Paste the above code and save with CTRL + O, Enter, then CTRL + X
-```
-
-Make it executable:
-
-```bash
-chmod +x generate_onion.sh
-```
-
----
-
-### ✅ 3. Run the Script
-
-```bash
-./generate_onion.sh
-```
-
-It will guide you through the process, ask for your desired prefix, install dependencies if needed, and generate the vanity `.onion` address.
-
-Once you've successfully generated a custom `.onion` address using `mkp224o`, the next step is to **configure and run a Tor hidden service** on your system to **serve content (e.g., a website) under that `.onion` address**.
-
-Here’s a **complete step-by-step guide** to help you run your server:
-
----
-
-## 🌐 Step-by-Step: Host Your Custom `.onion` Hidden Service
-
-### ✅ 1. **Check What Was Generated**
-
-After `mkp224o` finishes, you’ll find:
-
-```
-onions/
-└── <your-onion-folder>/
-    ├── hostname                 # Your .onion address
-    ├── hs_ed25519_secret_key   # Private key
-    └── hs_ed25519_public_key   # Public key
-```
-
-### 📝 Example:
-
-```bash
-ls onions/
-cat onions/hostname  # to see the address
-```
-
----
-
-### ✅ 2. **Install and Enable Tor**
-
-```bash
-sudo apt update
-sudo apt install tor -y
-```
-
-Start and enable Tor:
-
-```bash
-sudo systemctl enable tor
-sudo systemctl start tor
-```
-
----
-
-### ✅ 3. **Configure Tor Hidden Service**
-
-Edit the Tor config file:
-
-```bash
+# Configure Tor hidden service
 sudo nano /etc/tor/torrc
+# Add the following lines:
+# HiddenServiceDir /var/lib/tor/hidden_service/
+# HiddenServicePort 80 127.0.0.1:8080
+
+# Copy the private key to the hidden service directory
+sudo cp onions/hs_ed25519_secret_key /var/lib/tor/hidden_service/hs_ed25519_secret_key
+
+# Restart Tor
+sudo systemctl restart tor
 ```
 
-Add the following at the bottom:
+Now you should have your custom .onion address live and accessible via the Tor browser!
 
-```ini
-HiddenServiceDir /var/lib/tor/hidden_service/
-HiddenServicePort 80 127.0.0.1:8080
-```
-
-**Important**: This means:
-
-* Your web service should run on `localhost:8080`
-* Tor will expose it as your `.onion` domain on port 80
-
----
-
-### ✅ 4. **Replace the Default Hidden Service Keys**
-
-```bash
-sudo systemctl stop tor
-sudo rm -rf /var/lib/tor/hidden_service
-sudo mkdir -p /var/lib/tor/hidden_service
-sudo cp onions/<your-onion-folder>/* /var/lib/tor/hidden_service/
-sudo chown -R debian-tor:debian-tor /var/lib/tor/hidden_service
-sudo chmod 700 /var/lib/tor/hidden_service
-```
-
-> Replace `<your-onion-folder>` with the actual folder name (the full `.onion` address)
-
----
-
-### ✅ 5. **Start Tor Again**
-
-```bash
-sudo systemctl start tor
-```
-
-Check if it's running:
-
-```bash
-sudo systemctl status tor
-```
-
----
-
-### ✅ 6. **Start Your Web Server on Port 8080**
-
-Here’s a simple way using Python:
-
-```bash
-cd /var/www/html  # or any directory with your content
-python3 -m http.server 8080
-```
-
-Or, if using Flask/Django/Node.js etc., make sure your app runs on:
-
-```bash
-http://127.0.0.1:8080
-```
-
----
-
-### ✅ 7. **Access Your Hidden Service**
-
-* Open **Tor Browser**
-* Visit your `.onion` address (from `hostname` file)
-
-It should load your website!
-
----
-
-## 🧪 Example Summary Commands
-
-```bash
-sudo apt install tor -y
-sudo nano /etc/tor/torrc
-# Add HiddenService config...
-
-sudo systemctl stop tor
-sudo cp onions/<onion-folder>/* /var/lib/tor/hidden_service/
-sudo chown -R debian-tor:debian-tor /var/lib/tor/hidden_service
-sudo systemctl start tor
-
-# Start your app
-python3 -m http.server 8080
-```
-
----
-
-### ✅ **Download Tor Browser for Linux (64-bit)**
-
-#### **Option 1: Using your web browser**
-
-1. Go to the official Tor Project website:
-   👉 [https://www.torproject.org/download/](https://www.torproject.org/download/)
-
-2. Click on the **Linux** download button.
-
-   * It will download a file named something like:
-     `tor-browser-linux-x86_64-14.5.1.tar.xz`
-
-3. Save it to your desired directory — for example, `~/Documents/TorService`.
-
----
-
-#### **Option 2: Using the command line with `wget`**
-
-If you prefer downloading from the terminal, use this:
-
-```bash
-cd ~/Documents/TorService
-wget https://www.torproject.org/dist/torbrowser/14.5.1/tor-browser-linux-x86_64-14.5.1.tar.xz
-```
-
----
-
-### 📝 **Install Tor**
-
-1. **Extract**:
-
-   ```bash
-   tar -xf tor-browser-linux-x86_64-14.5.1.tar.xz
-   ```
-
-2. **Navigate**:
-
-   ```bash
-   cd tor-browser_en-US
-   ```
-
-3. **Launch**:
-
-   ```bash
-   ./start-tor-browser.desktop
-   ```
-
-   If needed:
-
-   ```bash
-   chmod +x start-tor-browser.desktop
-   ./start-tor-browser.desktop
-   ```
-
----
-
-Here’s a dynamic **reference table** for estimating the time to generate a Tor v3 **vanity `.onion` address** using [`mkp224o`](https://github.com/cathugger/mkp224o), based on:
-
-* ✅ **Machine type** (Laptop / Server / Cloud)
-* ✅ **CPU cores (threads)** used
-* ✅ **Prefix length** (number of characters you want the `.onion` to start with)
-* 🔁 **Estimated average time to generate**
-
----
-
-### 📊 Vanity `.onion` Address Generation Time Estimator Table
-
-| Machine Type                | Threads | Prefix Length | Est. Time       | Notes                             |
-| --------------------------- | ------- | ------------- | --------------- | --------------------------------- |
-| **Laptop (i7-6500U)**       | 4       | 6 chars       | \~10–20 minutes | Lightweight usage, older gen      |
-|                             | 4       | 7 chars       | \~6–12 hours    | Usable, best kept overnight       |
-|                             | 4       | 8 chars       | \~2–3 days      | Start getting impractical         |
-|                             | 4       | 10 chars      | \~3–4 weeks     | ⚠ Very long                       |
-|                             | 4       | 12 chars      | \~6+ months     | ❌ Not practical                   |
-| **Desktop (i7-9700K)**      | 8       | 6 chars       | \~3–5 minutes   | Modern desktop, fast base clock   |
-|                             | 8       | 7 chars       | \~3–6 hours     | Good balance                      |
-|                             | 8       | 8 chars       | \~1 day         | Long but doable                   |
-| **Server (Xeon Gold 6138)** | 40      | 6 chars       | \~1 minute      | Very fast                         |
-|                             | 40      | 7 chars       | \~10–30 minutes | Ideal for `imvicky`               |
-|                             | 40      | 8 chars       | \~1–2 hours     | Still very reasonable             |
-|                             | 40      | 10 chars      | \~4–7 days      | Acceptable for rare branding      |
-|                             | 40      | 12 chars      | \~30–60 days    | ⚠ Extremely slow, not recommended |
-| **Cloud VM (AVX2, 32vCPU)** | 32      | 6 chars       | \~1 minute      | With AVX2/AVX512 (e.g., AWS C6i)  |
-|                             | 32      | 7 chars       | \~5–10 minutes  | Lightning fast                    |
-|                             | 32      | 8 chars       | \~30–60 minutes | Great for production vanity names |
-
----
-
-### 🧠 Key Notes
-
-* ⏱️ **Time grows exponentially**: Each extra character multiplies the search time by **\~32×**.
-* 🧮 **Base32 math**: Each character = 5 bits. Prefix of N chars → `1 in 32^N` chance.
-* ⚙️ **AVX2/AVX512** support massively improves performance.
-* 🔁 **Actual time is probabilistic** — even with 40 threads, it can vary.
-
----
-
-## Run background process
-
-Screen Usage for Running Long Background Processes (e.g. mkp224o)
-
-This guide explains how to use `screen` to run long-running processes in the background safely.
-
----
-
-## 📦 Start a New Screen Session
-
-```bash
-screen -S <session_name>
-````
-
-**Example:**
-
-```bash
-screen -S mkp224o-clean
-```
-
-Once inside the screen, run your command:
-
-```bash
-./mkp224o -d onions IMVICKYKUMAR
-```
-
----
-
-## 🔌 Detach from a Session (Keep It Running in Background)
-
-Press:
-
-```
-Ctrl + A, then D
-```
-
-This detaches the session. The process keeps running in the background even if you close the terminal.
-
----
-
-## 🔁 Reconnect to a Session
-
-### If You Know the Name:
-
-```bash
-screen -r <session_name>
-```
-
-**Example:**
-
-```bash
-screen -r mkp224o-clean
-```
-
-### If There Are Multiple Sessions:
-
-```bash
-screen -ls
-```
-
-Then attach with the session ID:
-
-```bash
-screen -r <session_id>
-```
-
----
-
-## ❌ Quit a Screen Session (Stop the Process)
-
-### By Session Name:
-
-```bash
-screen -X -S <session_name> quit
-```
-
-**Example:**
-
-```bash
-screen -X -S mkp224o-clean quit
-```
-
-### By Session ID:
-
-```bash
-screen -X -S <session_id> quit
-```
-
-**Example:**
-
-```bash
-screen -X -S 123456.quit
-```
-
----
-
-## 🧼 List All Screen Sessions
-
-```bash
-screen -ls
-```
-
-Use this to see which sessions are active or detached.
-
----
-
-## 📎 Tip
-
-Use unique session names to avoid confusion when running multiple background tasks.
+Let me know if you need further clarification or run into any issues.
