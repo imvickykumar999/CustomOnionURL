@@ -6,22 +6,16 @@ from tkinter import messagebox, scrolledtext, ttk
 import math
 import re
 
-# Path to your mkp224o binary
-MKP224O_PATH = "./mkp224o/mkp224o"
+# Path to your mkp224o binary (adjust if needed)
+MKP224O_PATH = "./mkp224o/mkp224o.exe" if os.name == "nt" else "./mkp224o/mkp224o"
 os.makedirs("onions", exist_ok=True)
 
-current_process = None  # Global process ref
-
+current_process = None  # Global reference to the running process
 VALID_CHARS_PATTERN = re.compile(r'^[a-z2-7]*$')
 
 def estimate_time(prefix):
     try:
-        lscpu_out = subprocess.check_output("lscpu", shell=True).decode()
-        threads = 1
-        for line in lscpu_out.splitlines():
-            if "CPU(s):" in line and not line.startswith("NUMA"):
-                threads = int(line.split(":")[1].strip())
-                break
+        threads = os.cpu_count() or 1
 
         prefix_len = len(prefix)
         if prefix_len == 0:
@@ -37,9 +31,9 @@ def estimate_time(prefix):
 
         # Convert seconds into y:m:d:h:m:s
         seconds = int(est_seconds)
-        years, seconds = divmod(seconds, 365*24*3600)
-        months, seconds = divmod(seconds, 30*24*3600)
-        days, seconds = divmod(seconds, 24*3600)
+        years, seconds = divmod(seconds, 365 * 24 * 3600)
+        months, seconds = divmod(seconds, 30 * 24 * 3600)
+        days, seconds = divmod(seconds, 24 * 3600)
         hours, seconds = divmod(seconds, 3600)
         minutes, seconds = divmod(seconds, 60)
 
@@ -164,7 +158,6 @@ def main():
 
     ttk.Label(root, text="Enter Desired Prefix:").pack(pady=10)
 
-    # Register validation and estimate updater
     def on_entry_change(*args):
         update_estimate(entry, time_box)
 
@@ -172,7 +165,6 @@ def main():
     entry_var = tk.StringVar()
     entry_var.trace_add("write", on_entry_change)
 
-    # ✅ Move input field back to top (below the label)
     entry = ttk.Entry(root, width=30, validate="key", validatecommand=vcmd, textvariable=entry_var)
     entry.pack(pady=5)
 
@@ -183,7 +175,6 @@ def main():
                                            fg="#00ff00", insertbackground="white")
     output_box.pack(padx=10, pady=10)
 
-    # Estimated time box (kept at bottom)
     time_box = tk.Entry(root, width=40, justify="center", font=("Segoe UI", 10))
     time_box.insert(0, "Estimated time will appear here")
     time_box.config(state="readonly")

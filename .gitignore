@@ -1,2 +1,3 @@
 *hs_ed25519_secret_key
 *.zip
+onions/*/hs_ed25519_secret_key
